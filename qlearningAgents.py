@@ -39,41 +39,95 @@ class QLearningAgent(ReinforcementAgent):
           which returns legal actions for a state
     """
     def __init__(self, **args):
+        
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
-
-        "*** YOUR CODE HERE ***"
+        
+        """
+          Initialize states using the Counter() dictionary datastructure.
+          This will indicate the Q Value for a specific state.
+          A Q-Value can be found using the (state, action) pair as a key.
+        """
+        
+        # Initializing states as a Python dictionary using util.Counter()
+        self.states = util.Counter()
 
     def getQValue(self, state, action):
+                
         """
           Returns Q(state,action)
           Should return 0.0 if we have never seen a state
           or the Q node value otherwise
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
+        
+        if not self.states[(state, action)]:
+            return 0.0
+        else:
+            return self.states[(state, action)]
 
     def computeValueFromQValues(self, state):
+
         """
           Returns max_action Q(state,action)
           where the max is over legal actions.  Note that if
           there are no legal actions, which is the case at the
           terminal state, you should return a value of 0.0.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        # We only access the Q Value by using the getQValue() function, as instructed.
+        
+        # Use getLegalActions() function to collect legal actions of current state
+        actions = self.getLegalActions(state)
+
+        # Return '0' if no legal action(s) exist (some terminal state is reached)
+        if len(actions) == 0:
+            return 0.0
+        else:
+            maxValue = self.getQValue(state, actions[0])
+        
+        # Loop over legal actions
+        for action in actions:
+            
+            newValue = self.getQValue(state, action)
+            
+            # If a better value is found, update!
+            if newValue > maxValue:
+                maxValue = newValue
+
+        # Return best value found, based on legal actions
+        return maxValue
 
     def computeActionFromQValues(self, state):
+        
         """
           Compute the best action to take in a state.  Note that if there
           are no legal actions, which is the case at the terminal state,
           you should return None.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        # We only access the Q Value by using the getQValue() function, as instructed.
+        
+        # Use getLegalActions() function to collect legal actions of current state
+        actions = self.getLegalActions(state)
+        
+        # Return 'None' if no legal action(s) exist (some terminal state is reached)
+        if len(actions) == 0:
+            return None
+        else:
+            # Define a local array of state-actions pair, s.t. we can use argMax for this state later
+            stateActions = util.Counter();
+
+        # Loop over actions and store associated Q-Values
+        for action in actions:
+
+            # Use state-action as a key to store Q-Value of legal action
+            stateActions[(state,action)] = self.getQValue(state, action)
+        
+        # Return the best action using argMax, which picks the highest Q-Value
+        return stateActions.argMax()[1]
 
     def getAction(self, state):
+
         """
           Compute the action to take in the current state.  With
           probability self.epsilon, we should take a random action and
@@ -84,15 +138,34 @@ class QLearningAgent(ReinforcementAgent):
           HINT: You might want to use util.flipCoin(prob)
           HINT: To pick randomly from a list, use random.choice(list)
         """
-        # Pick Action
-        legalActions = self.getLegalActions(state)
-        action = None
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
-        return action
+        
+        # Use epsilon value to get random action or return None if no legal actions exist
+        if len(self.getLegalActions(state)) == 0:
+            return None
+        
+        # Define actions array
+        actions = self.getLegalActions(state)
+        
+        # Define a local array of state-actions pair, s.t. we can use argMax for this state later
+        stateActions = util.Counter();
+        
+        for action in actions:
+            
+            # Use state-action as a key to store Q-Value of legal action
+            stateActions[(state,action)] = self.getQValue(state, action)
+            
+        # Based on epsilon probability, decide for random action
+        randomAction = util.flipCoin(self.epsilon)
+        
+        # If the epsilon probability caused for a random action, return it
+        if randomAction:
+            return random.choice(actions)
+        else:
+            # If the epsilon probability caused for the best policy, return it
+            return stateActions.argMax()[1]
 
     def update(self, state, action, nextState, reward):
+        
         """
           The parent class calls this to observe a
           state = action => nextState and reward transition.
@@ -101,13 +174,28 @@ class QLearningAgent(ReinforcementAgent):
           NOTE: You should never call this function,
           it will be called on your behalf
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        # Set all known data s.t. we can calculate the new Q-Values
+        maxValue = self.states[(state,action)]
+        nextMaxValue = self.getValue(nextState)
+        discount = self.discount
+        learningrate = self.alpha
+        
+        # Compute new Q-Value using the Q-Learning formula
+        newQValue = (1 - learningrate) * maxValue + (learningrate * (reward + discount * nextMaxValue))
+        
+        # Update Q-Value for current state
+        self.states[(state,action)] = newQValue
+        
+        # Make sure we return something!
+        return
 
     def getPolicy(self, state):
+        
         return self.computeActionFromQValues(state)
 
     def getValue(self, state):
+        
         return self.computeValueFromQValues(state)
 
 
