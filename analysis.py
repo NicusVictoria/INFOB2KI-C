@@ -62,7 +62,21 @@ def question3e():
 def question6():
     answerEpsilon = None
     answerLearningRate = None
-    return answerEpsilon, answerLearningRate
+    
+    """
+    In order to learn a policy for >= 99% in 50 episodes,
+    we need the optimal policy to converge as fast as possible.
+    To achieve this, we need to eliminate as much noise as possible,
+    by making the epsilon value very small (close to 0) 
+    and setting our learning rate as high as possible (close to 1).
+    
+    According to the optimal policy value iteration, even for 50 iterations
+    it won't be possible to learn to optimal policy with >= 99% probability.
+    This means we return 'NOT POSSIBLE'
+    """
+    
+    #return answerEpsilon, answerLearningRate
+    return 'NOT POSSIBLE'
     # If not possible, return 'NOT POSSIBLE'
 
 if __name__ == '__main__':
