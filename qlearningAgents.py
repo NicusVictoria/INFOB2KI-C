@@ -74,7 +74,7 @@ class QLearningAgent(ReinforcementAgent):
           terminal state, you should return a value of 0.0.
         """
         
-        # We only access the Q Value by using the getQValue() function, as instructed.
+        # We only access the Q-Value by using the getQValue() function, as instructed.
         
         # Use getLegalActions() function to collect legal actions of current state
         actions = self.getLegalActions(state)
@@ -105,7 +105,7 @@ class QLearningAgent(ReinforcementAgent):
           you should return None.
         """
         
-        # We only access the Q Value by using the getQValue() function, as instructed.
+        # We only access the Q-Value by using the getQValue() function, as instructed.
         
         # Use getLegalActions() function to collect legal actions of current state
         actions = self.getLegalActions(state)
@@ -252,15 +252,36 @@ class ApproximateQAgent(PacmanQAgent):
           Should return Q(state,action) = w * featureVector
           where * is the dotProduct operator
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
+        
+        # First, get the features from featExtractor of the current state and action
+        features = self.featExtractor.getFeatures(state, action)
+        
+        # Set initial value to zero
+        totalFeaturesWeight = 0;
+        
+        # Loop over all features and add the weighted feature to the total sum
+        for feature in features:
+            totalFeaturesWeight += self.weights[feature] * features[feature]
+        
+        # Return the total sum of weighted features
+        return totalFeaturesWeight
+        
     def update(self, state, action, nextState, reward):
         """
            Should update your weights based on transition
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # We only access the Q-Value by using the getQValue() function, as instructed.
+        
+        # Get features of current state and action
+        features = self.featExtractor.getFeatures(state, action)
+        
+        # Use the formula to calculate the difference
+        difference = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state, action)
+        
+        # Update all features accordingly
+        for feature in features:
+            self.weights[feature] = self.weights[feature] + self.alpha * (difference * features[feature])
+
 
     def final(self, state):
         "Called at the end of each game."
